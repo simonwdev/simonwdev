@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:frost-survival-simulator.fandom.com)",
+      "WebFetch(domain:fnvdust.fandom.com)"
+    ]
+  }
+}

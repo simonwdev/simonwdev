@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DUST Perk Planner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="header">
+    <div class="title-block">
+      <h1>DUST <span>Perk Planner</span></h1>
+      <div class="mod-versions">Fallout: New Vegas DUST Survival Simulator</div>
+    </div>
+    <div class="header-controls">
+      <label class="level-selector">
+        Level <input type="number" id="level-input" min="1" max="50" value="1">
+      </label>
+      <div id="special-display" class="points-display"></div>
+      <div id="perk-display" class="points-display"></div>
+    </div>
+    <div class="header-actions">
+      <button id="btn-share" class="btn-share" title="Copy share link">&#x1f517; Share</button>
+      <button id="btn-reset" class="btn-reset" title="Reset all">&#x21bb; Reset</button>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <div class="char-panel">
+      <h2>S.P.E.C.I.A.L.</h2>
+      <div id="special-list" class="special-list"></div>
+
+      <h3>Skills</h3>
+      <div id="skills-list" class="skills-list"></div>
+
+      <div class="sanity-row">
+        <label>Sanity</label>
+        <input type="number" id="sanity-input" min="-1000" max="1000" value="250">
+      </div>
+      <div class="rads-row">
+        <label>Rads</label>
+        <input type="number" id="rads-input" min="0" max="1000" value="0">
+      </div>
+    </div>
+
+    <div class="perk-browser">
+      <div class="filters">
+        <input type="text" id="filter-search" placeholder="Search perks...">
+        <select id="filter-category">
+          <option value="all">All Categories</option>
+        </select>
+        <label>
+          <input type="checkbox" id="filter-available"> Available only
+        </label>
+        <select id="filter-sort">
+          <option value="name">Sort: Name</option>
+          <option value="category">Sort: Category</option>
+          <option value="level">Sort: Level</option>
+        </select>
+      </div>
+      <div id="perk-grid" class="perk-grid"></div>
+    </div>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <script src="skills.js"></script>
+  <script src="perks.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
