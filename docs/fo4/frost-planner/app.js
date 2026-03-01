@@ -263,5 +263,96 @@
 
   document.getElementById('btn-reset').addEventListener('click', resetAll);
 
+  // --- Share / URL serialization ---
+
+  function encodeBuild() {
+    const bits = [];
+    function push(value, width) {
+      for (let i = width - 1; i >= 0; i--) bits.push((value >> i) & 1);
+    }
+    push(1, 4);               // version
+    push(playerLevel, 6);
+    push(youreSpecial ? 1 : 0, 1);
+    for (let i = 0; i < 7; i++) push(bobbles[i] ? 1 : 0, 1);
+    for (let i = 0; i < 7; i++) push(stats[i], 4);
+    KEYS.forEach(k => { for (let i = 0; i < 10; i++) push(perkRanks[k][i], 3); });
+    for (let i = 0; i < 16; i++) push(nsRanks[i], 2);
+    // bits.length should be 288 = 36 bytes
+    const bytes = new Uint8Array(Math.ceil(bits.length / 8));
+    for (let i = 0; i < bits.length; i++) {
+      if (bits[i]) bytes[i >> 3] |= 1 << (7 - (i & 7));
+    }
+    // base64url encode (no padding)
+    let b64 = btoa(String.fromCharCode(...bytes));
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function decodeBuild(str) {
+    try {
+      let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      const raw = atob(b64);
+      const bytes = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+      if (bytes.length < 36) return null;
+      let pos = 0;
+      function read(width) {
+        let val = 0;
+        for (let i = 0; i < width; i++) {
+          val = (val << 1) | ((bytes[pos >> 3] >> (7 - (pos & 7))) & 1);
+          pos++;
+        }
+        return val;
+      }
+      const version = read(4);
+      if (version !== 1) return null;
+      const pl = read(6);
+      const ys = read(1) === 1;
+      const bob = [];
+      for (let i = 0; i < 7; i++) bob.push(read(1) === 1);
+      const st = [];
+      for (let i = 0; i < 7; i++) st.push(read(4));
+      const pr = {};
+      KEYS.forEach(k => { pr[k] = []; for (let i = 0; i < 10; i++) pr[k].push(read(3)); });
+      const ns = [];
+      for (let i = 0; i < 16; i++) ns.push(read(2));
+      return { playerLevel: pl, youreSpecial: ys, bobbles: bob, stats: st, perkRanks: pr, nsRanks: ns };
+    } catch (e) { return null; }
+  }
+
+  function applyBuild(b) {
+    playerLevel = b.playerLevel;
+    youreSpecial = b.youreSpecial;
+    bobbles = b.bobbles;
+    stats = b.stats;
+    perkRanks = b.perkRanks;
+    nsRanks = b.nsRanks;
+    document.getElementById('level-input').value = playerLevel;
+    document.getElementById('youre-special-check').checked = youreSpecial;
+    render();
+  }
+
+  document.getElementById('btn-share').addEventListener('click', () => {
+    const encoded = encodeBuild();
+    const url = location.origin + location.pathname + '#b=' + encoded;
+    history.replaceState(null, '', '#b=' + encoded);
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('btn-share');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.innerHTML = '&#x1f517; Share'; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+
+  // Load build from URL hash on startup
+  function loadFromHash() {
+    const hash = location.hash;
+    if (hash.startsWith('#b=')) {
+      const build = decodeBuild(hash.slice(3));
+      if (build) applyBuild(build);
+    }
+  }
+
   render();
+  loadFromHash();
 })();
