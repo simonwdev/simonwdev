@@ -17,7 +17,7 @@
   let tooltipTarget = null;
 
   function bobbleCount() { return bobbles.filter(b => b).length; }
-  function specialTotal() { return SPECIAL_POOL + bobbleCount() + (youreSpecial ? 1 : 0); }
+  function specialTotal() { return SPECIAL_POOL + (youreSpecial ? 1 : 0); }
   function specialUsed() { return stats.reduce((a,b) => a + b, 0); }
   function specialRemaining() { return specialTotal() - specialUsed(); }
   function effectiveStat(i) { return stats[i] + (bobbles[i] ? 1 : 0); }
