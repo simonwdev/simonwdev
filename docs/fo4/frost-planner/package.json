@@ -1,0 +1,8 @@
+{
+  "name": "frost-planner",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "npx serve -p 3000"
+  }
+}
