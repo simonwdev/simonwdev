@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = '1.2';
+  const APP_VERSION = '1.3';
   const KEYS = ['strength','perception','endurance','charisma','intelligence','agility','luck'];
   const CSS_KEYS = ['str','per','end','chr','int','agi','lck'];
   const SPECIAL_POOL = 28; // 7 base (1 each) + 21 distributable
@@ -94,12 +94,15 @@
       div.innerHTML = `
         <div class="label">${SPECIAL_ABBR[i]}</div>
         <div class="value">${eff}</div>
-        <button class="bobble-btn ${bobbles[i] ? 'active' : ''}" title="Toggle Bobblehead">B</button>
         <div class="controls">
           <button class="dec" ${stats[i] <= MIN_STAT ? 'disabled' : ''}>-</button>
           <button class="inc" ${baseCap || specialRemaining() <= 0 ? 'disabled' : ''}>+</button>
-        </div>`;
-      div.querySelector('.bobble-btn').addEventListener('click', () => { bobbles[i] = !bobbles[i]; render(); });
+        </div>
+        <button class="bobble-btn ${bobbles[i] ? 'active' : ''}" title="Toggle Bobblehead"><img src="NicePng_fallout-png_190128.png" alt="Bobblehead" width="24" height="24"></button>`;
+      const bobbleBtn = div.querySelector('.bobble-btn');
+      bobbleBtn.addEventListener('click', () => { bobbles[i] = !bobbles[i]; render(); });
+      bobbleBtn.addEventListener('mouseenter', (e) => { showBobbleTooltip(e, i); tooltipTarget = bobbleBtn; });
+      bobbleBtn.addEventListener('mouseleave', hideTooltip);
       div.querySelector('.dec').addEventListener('click', () => { if (stats[i] > MIN_STAT) { stats[i]--; render(); }});
       div.querySelector('.inc').addEventListener('click', () => { if (stats[i] + trained[i] < MAX_STAT && specialRemaining() > 0) { stats[i]++; render(); }});
       row.appendChild(div);
@@ -239,6 +242,16 @@
       const active = i < taken ? ' active' : '';
       html += `<div class="tt-rank${active}"><span class="rank-label">Rank ${i+1}</span><br>${r.desc}</div>`;
     });
+    tooltip.innerHTML = html;
+    tooltip.classList.add('visible');
+    positionTooltip(e);
+  }
+
+  function showBobbleTooltip(e, i) {
+    const name = SPECIAL_NAMES[i];
+    const active = bobbles[i];
+    let html = `<div class="tt-name">${name} Bobblehead</div>`;
+    html += `<div class="tt-rank${active ? ' active' : ''}">+1 ${name}${active ? ' (active)' : ''}</div>`;
     tooltip.innerHTML = html;
     tooltip.classList.add('visible');
     positionTooltip(e);
