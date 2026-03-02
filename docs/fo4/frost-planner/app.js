@@ -1,4 +1,5 @@
 (() => {
+  const APP_VERSION = '1.2';
   const KEYS = ['strength','perception','endurance','charisma','intelligence','agility','luck'];
   const CSS_KEYS = ['str','per','end','chr','int','agi','lck'];
   const SPECIAL_POOL = 28; // 7 base (1 each) + 21 distributable
@@ -6,6 +7,7 @@
   const MAX_STAT = 10;
 
   let stats = [1,1,1,1,1,1,1];
+  let trained = [0,0,0,0,0,0,0];
   let bobbles = [false,false,false,false,false,false,false];
   let youreSpecial = false;
   let playerLevel = 0;
@@ -20,11 +22,12 @@
   function specialTotal() { return SPECIAL_POOL + (youreSpecial ? 1 : 0); }
   function specialUsed() { return stats.reduce((a,b) => a + b, 0); }
   function specialRemaining() { return specialTotal() - specialUsed(); }
-  function effectiveStat(i) { return stats[i] + (bobbles[i] ? 1 : 0); }
+  function effectiveStat(i) { return stats[i] + trained[i] + (bobbles[i] ? 1 : 0); }
 
   function perkPointsTotal() { return playerLevel; }
   function perkPointsUsed() {
     let count = 0;
+    trained.forEach(t => count += t);
     KEYS.forEach(k => { perkRanks[k].forEach(r => count += r); });
     nsRanks.forEach(r => count += r);
     return count;
@@ -47,6 +50,9 @@
   }
 
   function trimLastPerkRank() {
+    for (let i = trained.length - 1; i >= 0; i--) {
+      if (trained[i] > 0) { trained[i]--; return; }
+    }
     for (let i = NON_SPECIAL_PERKS.length - 1; i >= 0; i--) {
       if (nsRanks[i] > 0) { nsRanks[i]--; return; }
     }
@@ -84,17 +90,18 @@
       const eff = effectiveStat(i);
       const div = document.createElement('div');
       div.className = `special-stat ${CSS_KEYS[i]}`;
+      const baseCap = stats[i] + trained[i] >= MAX_STAT;
       div.innerHTML = `
         <div class="label">${SPECIAL_ABBR[i]}</div>
         <div class="value">${eff}</div>
         <button class="bobble-btn ${bobbles[i] ? 'active' : ''}" title="Toggle Bobblehead">B</button>
         <div class="controls">
           <button class="dec" ${stats[i] <= MIN_STAT ? 'disabled' : ''}>-</button>
-          <button class="inc" ${stats[i] >= MAX_STAT || specialRemaining() <= 0 ? 'disabled' : ''}>+</button>
+          <button class="inc" ${baseCap || specialRemaining() <= 0 ? 'disabled' : ''}>+</button>
         </div>`;
       div.querySelector('.bobble-btn').addEventListener('click', () => { bobbles[i] = !bobbles[i]; render(); });
       div.querySelector('.dec').addEventListener('click', () => { if (stats[i] > MIN_STAT) { stats[i]--; render(); }});
-      div.querySelector('.inc').addEventListener('click', () => { if (stats[i] < MAX_STAT && specialRemaining() > 0) { stats[i]++; render(); }});
+      div.querySelector('.inc').addEventListener('click', () => { if (stats[i] + trained[i] < MAX_STAT && specialRemaining() > 0) { stats[i]++; render(); }});
       row.appendChild(div);
     }
   }
@@ -147,6 +154,22 @@
 
         colDiv.appendChild(cell);
       });
+
+      // Training row
+      const trainCell = document.createElement('div');
+      trainCell.className = 'train-cell';
+      const baseCap = stats[col] + trained[col] >= MAX_STAT;
+      trainCell.innerHTML = `
+        <span class="train-title">Training</span>
+        <div class="train-controls">
+          <button class="train-dec" ${trained[col] <= 0 ? 'disabled' : ''}>-</button>
+          <span class="train-label">${trained[col] > 0 ? trained[col] : '0'}</span>
+          <button class="train-inc" ${baseCap || perkPointsRemaining() <= 0 ? 'disabled' : ''}>+</button>
+        </div>`;
+      trainCell.querySelector('.train-dec').addEventListener('click', () => { if (trained[col] > 0) { trained[col]--; render(); }});
+      trainCell.querySelector('.train-inc').addEventListener('click', () => { if (stats[col] + trained[col] < MAX_STAT && perkPointsRemaining() > 0) { trained[col]++; render(); }});
+      colDiv.appendChild(trainCell);
+
       grid.appendChild(colDiv);
     });
   }
@@ -239,6 +262,7 @@
 
   function resetAll() {
     stats = [1,1,1,1,1,1,1];
+    trained = [0,0,0,0,0,0,0];
     bobbles = [false,false,false,false,false,false,false];
     youreSpecial = false;
     document.getElementById('youre-special-check').checked = false;
@@ -270,14 +294,15 @@
     function push(value, width) {
       for (let i = width - 1; i >= 0; i--) bits.push((value >> i) & 1);
     }
-    push(1, 4);               // version
+    push(2, 4);               // version
     push(playerLevel, 6);
     push(youreSpecial ? 1 : 0, 1);
     for (let i = 0; i < 7; i++) push(bobbles[i] ? 1 : 0, 1);
     for (let i = 0; i < 7; i++) push(stats[i], 4);
     KEYS.forEach(k => { for (let i = 0; i < 10; i++) push(perkRanks[k][i], 3); });
     for (let i = 0; i < 16; i++) push(nsRanks[i], 2);
-    // bits.length should be 288 = 36 bytes
+    for (let i = 0; i < 7; i++) push(trained[i], 4);
+    // bits.length should be 316 = 40 bytes
     const bytes = new Uint8Array(Math.ceil(bits.length / 8));
     for (let i = 0; i < bits.length; i++) {
       if (bits[i]) bytes[i >> 3] |= 1 << (7 - (i & 7));
@@ -305,7 +330,7 @@
         return val;
       }
       const version = read(4);
-      if (version !== 1) return null;
+      if (version !== 1 && version !== 2) return null;
       const pl = read(6);
       const ys = read(1) === 1;
       const bob = [];
@@ -316,7 +341,13 @@
       KEYS.forEach(k => { pr[k] = []; for (let i = 0; i < 10; i++) pr[k].push(read(3)); });
       const ns = [];
       for (let i = 0; i < 16; i++) ns.push(read(2));
-      return { playerLevel: pl, youreSpecial: ys, bobbles: bob, stats: st, perkRanks: pr, nsRanks: ns };
+      const tr = [];
+      if (version >= 2 && bytes.length >= 40) {
+        for (let i = 0; i < 7; i++) tr.push(read(4));
+      } else {
+        for (let i = 0; i < 7; i++) tr.push(0);
+      }
+      return { playerLevel: pl, youreSpecial: ys, bobbles: bob, stats: st, perkRanks: pr, nsRanks: ns, trained: tr };
     } catch (e) { return null; }
   }
 
@@ -325,6 +356,7 @@
     youreSpecial = b.youreSpecial;
     bobbles = b.bobbles;
     stats = b.stats;
+    trained = b.trained || [0,0,0,0,0,0,0];
     perkRanks = b.perkRanks;
     nsRanks = b.nsRanks;
     document.getElementById('level-input').value = playerLevel;
@@ -353,6 +385,7 @@
     }
   }
 
+  document.getElementById('app-version').textContent = 'v' + APP_VERSION;
   render();
   loadFromHash();
 })();

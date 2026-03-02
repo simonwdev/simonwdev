@@ -9,8 +9,10 @@
 html{font-size:22px}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;padding:12px}
 
-h1{font-size:1.3rem;color:var(--text-bright);font-weight:600;letter-spacing:.5px}
+h1{font-size:1.3rem;color:var(--text-bright);font-weight:600;letter-spacing:.5px;display:flex;align-items:baseline;gap:6px}
 h1 span{color:var(--accent);font-weight:400}
+.frost-logo{height:1.8rem;align-self:center}
+.app-version{font-size:.6rem;color:var(--text-dim);font-weight:400}
 .title-block{display:flex;flex-direction:column;gap:2px}
 .mod-versions{font-size:14px;color:var(--text-dim);letter-spacing:.3px}
 
@@ -51,6 +53,14 @@ h1 span{color:var(--accent);font-weight:400}
 .special-stat .controls button{width:24px;height:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:3px;cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .special-stat .controls button:hover:not(:disabled){background:var(--surface3);border-color:var(--accent)}
 .special-stat .controls button:disabled{opacity:.3;cursor:default}
+/* Training row in perk grid */
+.train-cell{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:4px;padding:4px 6px;display:flex;justify-content:space-between;align-items:center}
+.train-cell .train-title{font-size:.7rem;font-weight:700;color:var(--yellow);letter-spacing:.5px}
+.train-cell .train-controls{display:flex;gap:4px;align-items:center}
+.train-cell .train-controls button{width:22px;height:20px;border:1px solid var(--yellow);background:var(--surface2);color:var(--yellow);border-radius:3px;cursor:pointer;font-size:.85rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.train-cell .train-controls button:hover:not(:disabled){background:var(--surface3);color:var(--text-bright)}
+.train-cell .train-controls button:disabled{opacity:.3;cursor:default}
+.train-cell .train-label{font-size:.75rem;font-weight:700;color:var(--yellow);min-width:18px;text-align:center}
 
 .special-stat.str .label{color:var(--str)}.special-stat.str .value{color:var(--str)}
 .special-stat.per .label{color:var(--per)}.special-stat.per .value{color:var(--per)}
@@ -115,6 +125,12 @@ h1 span{color:var(--accent);font-weight:400}
 .ns-cell .rank-dot{width:14px;height:14px;border-radius:50%;border:2px solid #707080;background:#2a2a34;transition:all .15s}
 .ns-cell .rank-dot.filled{background:var(--accent);border-color:var(--accent-bright)}
 .ns-cell .rank-dot:hover{border-color:var(--accent)}
+
+/* Footer */
+.footer{margin-top:12px;padding:8px 0;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;font-size:.7rem}
+.footer a{color:var(--text-dim);text-decoration:none;transition:color .15s;display:flex;align-items:center;gap:4px}
+.footer a:hover{color:var(--accent)}
+.footer .copyright{width:100%;text-align:center;color:var(--text-dim);font-size:.6rem;opacity:.6}
 
 /* Responsive */
 @media(max-width:900px){
