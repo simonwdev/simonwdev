@@ -98,7 +98,7 @@
           <button class="dec" ${stats[i] <= MIN_STAT ? 'disabled' : ''}>-</button>
           <button class="inc" ${baseCap || specialRemaining() <= 0 ? 'disabled' : ''}>+</button>
         </div>
-        <button class="bobble-btn ${bobbles[i] ? 'active' : ''}" title="Toggle Bobblehead"><img src="NicePng_fallout-png_190128.png" alt="Bobblehead" width="24" height="24"></button>`;
+        <button class="bobble-btn ${bobbles[i] ? 'active' : ''}" title="Toggle Bobblehead"><img src="Icon_Fo4_side_quest.webp" alt="Bobblehead" width="24" height="24"></button>`;
       const bobbleBtn = div.querySelector('.bobble-btn');
       bobbleBtn.addEventListener('click', () => { bobbles[i] = !bobbles[i]; render(); });
       bobbleBtn.addEventListener('mouseenter', (e) => { showBobbleTooltip(e, i); tooltipTarget = bobbleBtn; });
