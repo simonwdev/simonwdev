@@ -18,6 +18,44 @@
   const tooltip = document.getElementById('tooltip');
   let tooltipTarget = null;
 
+  let isTouchDevice = false;
+  let touchActiveTarget = null;
+  let longPressTimer = null;
+  const LONG_PRESS_MS = 400;
+  const LONG_PRESS_MOVE_THRESHOLD = 10;
+  document.addEventListener('touchstart', () => { isTouchDevice = true; }, { once: true });
+
+  function bindLongPress(el, onLongPress) {
+    let startX, startY;
+    el.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        hideTooltip();
+        onLongPress(e);
+        positionTooltipTouch(el);
+        tooltip.classList.add('touch-active');
+        touchActiveTarget = el;
+        tooltipTarget = el;
+      }, LONG_PRESS_MS);
+    }, { passive: true });
+    el.addEventListener('touchmove', (e) => {
+      if (!longPressTimer) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      if (dx * dx + dy * dy > LONG_PRESS_MOVE_THRESHOLD * LONG_PRESS_MOVE_THRESHOLD) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    }, { passive: true });
+    el.addEventListener('touchend', () => {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    });
+  }
+
   function bobbleCount() { return bobbles.filter(b => b).length; }
   function specialTotal() { return SPECIAL_POOL + (youreSpecial ? 1 : 0); }
   function specialUsed() { return stats.reduce((a,b) => a + b, 0); }
@@ -65,6 +103,7 @@
   }
 
   function render() {
+    hideTooltip();
     renderSpecial();
     renderPerks();
     renderNonSpecial();
@@ -101,8 +140,9 @@
         <button class="bobble-btn ${bobbles[i] ? 'active' : ''}" title="Toggle Bobblehead"><img src="Icon_Fo4_side_quest.webp" alt="Bobblehead" width="24" height="24"></button>`;
       const bobbleBtn = div.querySelector('.bobble-btn');
       bobbleBtn.addEventListener('click', () => { bobbles[i] = !bobbles[i]; render(); });
-      bobbleBtn.addEventListener('mouseenter', (e) => { showBobbleTooltip(e, i); tooltipTarget = bobbleBtn; });
-      bobbleBtn.addEventListener('mouseleave', hideTooltip);
+      bobbleBtn.addEventListener('mouseenter', (e) => { if (isTouchDevice) return; showBobbleTooltip(e, i); tooltipTarget = bobbleBtn; });
+      bobbleBtn.addEventListener('mouseleave', () => { if (isTouchDevice) return; hideTooltip(); });
+      bindLongPress(bobbleBtn, (e) => { showBobbleTooltip(e, i); });
       div.querySelector('.dec').addEventListener('click', () => { if (stats[i] > MIN_STAT) { stats[i]--; render(); }});
       div.querySelector('.inc').addEventListener('click', () => { if (stats[i] + trained[i] < MAX_STAT && specialRemaining() > 0) { stats[i]++; render(); }});
       row.appendChild(div);
@@ -151,9 +191,10 @@
         });
         cell.appendChild(ranksDiv);
 
-        cell.addEventListener('mouseenter', (e) => { showTooltip(e, perk, perkRanks[key][pi], col); tooltipTarget = cell; });
-        cell.addEventListener('mousemove', positionTooltip);
-        cell.addEventListener('mouseleave', hideTooltip);
+        cell.addEventListener('mouseenter', (e) => { if (isTouchDevice) return; showTooltip(e, perk, perkRanks[key][pi], col); tooltipTarget = cell; });
+        cell.addEventListener('mousemove', (e) => { if (isTouchDevice) return; positionTooltip(e); });
+        cell.addEventListener('mouseleave', () => { if (isTouchDevice) return; hideTooltip(); });
+        bindLongPress(cell, (e) => { showTooltip(e, perk, perkRanks[key][pi], col); });
 
         colDiv.appendChild(cell);
       });
@@ -212,9 +253,10 @@
       });
       cell.appendChild(ranksDiv);
 
-      cell.addEventListener('mouseenter', (e) => { showNsTooltip(e, perk, nsRanks[pi]); tooltipTarget = cell; });
-      cell.addEventListener('mousemove', positionTooltip);
-      cell.addEventListener('mouseleave', hideTooltip);
+      cell.addEventListener('mouseenter', (e) => { if (isTouchDevice) return; showNsTooltip(e, perk, nsRanks[pi]); tooltipTarget = cell; });
+      cell.addEventListener('mousemove', (e) => { if (isTouchDevice) return; positionTooltip(e); });
+      cell.addEventListener('mouseleave', () => { if (isTouchDevice) return; hideTooltip(); });
+      bindLongPress(cell, (e) => { showNsTooltip(e, perk, nsRanks[pi]); });
 
       grid.appendChild(cell);
     });
@@ -231,7 +273,7 @@
     });
     tooltip.innerHTML = html;
     tooltip.classList.add('visible');
-    positionTooltip(e);
+    if (!isTouchDevice) positionTooltip(e);
   }
 
   function showNsTooltip(e, perk, taken) {
@@ -244,7 +286,7 @@
     });
     tooltip.innerHTML = html;
     tooltip.classList.add('visible');
-    positionTooltip(e);
+    if (!isTouchDevice) positionTooltip(e);
   }
 
   function showBobbleTooltip(e, i) {
@@ -254,7 +296,7 @@
     html += `<div class="tt-rank${active ? ' active' : ''}">+1 ${name}${active ? ' (active)' : ''}</div>`;
     tooltip.innerHTML = html;
     tooltip.classList.add('visible');
-    positionTooltip(e);
+    if (!isTouchDevice) positionTooltip(e);
   }
 
   function positionTooltip(e) {
@@ -268,9 +310,25 @@
     tooltip.style.top = y + 'px';
   }
 
+  function positionTooltipTouch(referenceEl) {
+    FloatingUIDOM.computePosition(referenceEl, tooltip, {
+      placement: 'bottom',
+      strategy: 'fixed',
+      middleware: [
+        FloatingUIDOM.offset(8),
+        FloatingUIDOM.flip(),
+        FloatingUIDOM.shift({ padding: 8 })
+      ]
+    }).then(({ x, y }) => {
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    });
+  }
+
   function hideTooltip() {
-    tooltip.classList.remove('visible');
+    tooltip.classList.remove('visible', 'touch-active');
     tooltipTarget = null;
+    touchActiveTarget = null;
   }
 
   function resetAll() {
@@ -397,6 +455,17 @@
       if (build) applyBuild(build);
     }
   }
+
+  document.addEventListener('click', (e) => {
+    if (!isTouchDevice || !touchActiveTarget) return;
+    if (tooltip.contains(e.target)) return;
+    if (touchActiveTarget.contains(e.target)) return;
+    hideTooltip();
+  });
+
+  window.addEventListener('scroll', () => {
+    if (touchActiveTarget) hideTooltip();
+  }, { passive: true, capture: true });
 
   document.getElementById('app-version').textContent = 'v' + APP_VERSION;
   render();
