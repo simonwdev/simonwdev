@@ -43,8 +43,7 @@ h1 span{color:var(--accent);font-weight:400}
 .btn-reset{background:none;border:1px solid var(--border);color:var(--text-dim);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.8rem;transition:all .15s}
 .btn-reset:hover{border-color:var(--red);color:var(--red)}
 
-/* SPECIAL row */
-.special-row{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+/* SPECIAL stat (inside perk-col) */
 .special-stat{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;position:relative}
 .special-stat .label{font-size:.7rem;font-weight:700;letter-spacing:1px}
 .special-stat .value{font-size:1.2rem;font-weight:700;color:var(--text-bright);line-height:1}
@@ -135,9 +134,9 @@ h1 span{color:var(--accent);font-weight:400}
 
 /* Responsive */
 @media(max-width:900px){
-  .perk-grid,.special-row{grid-template-columns:repeat(4,1fr)}
+  .perk-grid{grid-template-columns:repeat(4,1fr)}
 }
 @media(max-width:600px){
-  .perk-grid,.special-row{grid-template-columns:repeat(2,1fr)}
+  .perk-grid{grid-template-columns:repeat(2,1fr)}
   html{font-size:12px}
 }

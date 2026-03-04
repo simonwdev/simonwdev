@@ -104,7 +104,6 @@
 
   function render() {
     hideTooltip();
-    renderSpecial();
     renderPerks();
     renderNonSpecial();
     renderHeader();
@@ -122,33 +121,6 @@
     pDisplay.className = 'points-display' + (pRem < 0 ? ' over' : '');
   }
 
-  function renderSpecial() {
-    const row = document.getElementById('special-row');
-    row.innerHTML = '';
-    for (let i = 0; i < 7; i++) {
-      const eff = effectiveStat(i);
-      const div = document.createElement('div');
-      div.className = `special-stat ${CSS_KEYS[i]}`;
-      const baseCap = stats[i] + trained[i] >= MAX_STAT;
-      div.innerHTML = `
-        <div class="label">${SPECIAL_ABBR[i]}</div>
-        <div class="value">${eff}</div>
-        <div class="controls">
-          <button class="dec" ${stats[i] <= MIN_STAT ? 'disabled' : ''}>-</button>
-          <button class="inc" ${baseCap || specialRemaining() <= 0 ? 'disabled' : ''}>+</button>
-        </div>
-        <button class="bobble-btn ${bobbles[i] ? 'active' : ''}" title="Toggle Bobblehead"><img src="Icon_Fo4_side_quest.webp" alt="Bobblehead" width="24" height="24"></button>`;
-      const bobbleBtn = div.querySelector('.bobble-btn');
-      bobbleBtn.addEventListener('click', () => { bobbles[i] = !bobbles[i]; render(); });
-      bobbleBtn.addEventListener('mouseenter', (e) => { if (isTouchDevice) return; showBobbleTooltip(e, i); tooltipTarget = bobbleBtn; });
-      bobbleBtn.addEventListener('mouseleave', () => { if (isTouchDevice) return; hideTooltip(); });
-      bindLongPress(bobbleBtn, (e) => { showBobbleTooltip(e, i); });
-      div.querySelector('.dec').addEventListener('click', () => { if (stats[i] > MIN_STAT) { stats[i]--; render(); }});
-      div.querySelector('.inc').addEventListener('click', () => { if (stats[i] + trained[i] < MAX_STAT && specialRemaining() > 0) { stats[i]++; render(); }});
-      row.appendChild(div);
-    }
-  }
-
   function renderPerks() {
     const grid = document.getElementById('perk-grid');
     grid.innerHTML = '';
@@ -156,6 +128,28 @@
     KEYS.forEach((key, col) => {
       const colDiv = document.createElement('div');
       colDiv.className = `perk-col ${CSS_KEYS[col]}`;
+
+      // SPECIAL stat header
+      const eff = effectiveStat(col);
+      const statDiv = document.createElement('div');
+      statDiv.className = `special-stat ${CSS_KEYS[col]}`;
+      const baseCap = stats[col] + trained[col] >= MAX_STAT;
+      statDiv.innerHTML = `
+        <div class="label">${SPECIAL_ABBR[col]}</div>
+        <div class="value">${eff}</div>
+        <div class="controls">
+          <button class="dec" ${stats[col] <= MIN_STAT ? 'disabled' : ''}>-</button>
+          <button class="inc" ${baseCap || specialRemaining() <= 0 ? 'disabled' : ''}>+</button>
+        </div>
+        <button class="bobble-btn ${bobbles[col] ? 'active' : ''}" title="Toggle Bobblehead"><img src="Icon_Fo4_side_quest.webp" alt="Bobblehead" width="24" height="24"></button>`;
+      const bobbleBtn = statDiv.querySelector('.bobble-btn');
+      bobbleBtn.addEventListener('click', () => { bobbles[col] = !bobbles[col]; render(); });
+      bobbleBtn.addEventListener('mouseenter', (e) => { if (isTouchDevice) return; showBobbleTooltip(e, col); tooltipTarget = bobbleBtn; });
+      bobbleBtn.addEventListener('mouseleave', () => { if (isTouchDevice) return; hideTooltip(); });
+      bindLongPress(bobbleBtn, (e) => { showBobbleTooltip(e, col); });
+      statDiv.querySelector('.dec').addEventListener('click', () => { if (stats[col] > MIN_STAT) { stats[col]--; render(); }});
+      statDiv.querySelector('.inc').addEventListener('click', () => { if (stats[col] + trained[col] < MAX_STAT && specialRemaining() > 0) { stats[col]++; render(); }});
+      colDiv.appendChild(statDiv);
       const perks = PERKS[key];
       perks.forEach((perk, pi) => {
         const eff = effectiveStat(col);
@@ -202,7 +196,6 @@
       // Training row
       const trainCell = document.createElement('div');
       trainCell.className = 'train-cell';
-      const baseCap = stats[col] + trained[col] >= MAX_STAT;
       trainCell.innerHTML = `
         <span class="train-title">Training</span>
         <div class="train-controls">
