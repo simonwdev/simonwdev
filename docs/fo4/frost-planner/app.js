@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = '1.3';
+  const APP_VERSION = '1.4';
   const KEYS = ['strength','perception','endurance','charisma','intelligence','agility','luck'];
   const CSS_KEYS = ['str','per','end','chr','int','agi','lck'];
   const SPECIAL_POOL = 28; // 7 base (1 each) + 21 distributable
