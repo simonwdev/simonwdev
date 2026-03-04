@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = '1.4';
+  const APP_VERSION = '1.5';
   const KEYS = ['strength','perception','endurance','charisma','intelligence','agility','luck'];
   const CSS_KEYS = ['str','per','end','chr','int','agi','lck'];
   const SPECIAL_POOL = 28; // 7 base (1 each) + 21 distributable
@@ -137,11 +137,13 @@
       statDiv.innerHTML = `
         <div class="label">${SPECIAL_ABBR[col]}</div>
         <div class="value">${eff}</div>
-        <div class="controls">
-          <button class="dec" ${stats[col] <= MIN_STAT ? 'disabled' : ''}>-</button>
-          <button class="inc" ${baseCap || specialRemaining() <= 0 ? 'disabled' : ''}>+</button>
-        </div>
-        <button class="bobble-btn ${bobbles[col] ? 'active' : ''}" title="Toggle Bobblehead"><img src="Icon_Fo4_side_quest.webp" alt="Bobblehead" width="24" height="24"></button>`;
+        <div class="stat-buttons">
+          <div class="controls">
+            <button class="dec" ${stats[col] <= MIN_STAT ? 'disabled' : ''}>-</button>
+            <button class="inc" ${baseCap || specialRemaining() <= 0 ? 'disabled' : ''}>+</button>
+          </div>
+          <button class="bobble-btn ${bobbles[col] ? 'active' : ''}" title="Toggle Bobblehead"><img src="Icon_Fo4_side_quest.webp" alt="Bobblehead" width="24" height="24"></button>
+        </div>`;
       const bobbleBtn = statDiv.querySelector('.bobble-btn');
       bobbleBtn.addEventListener('click', () => { bobbles[col] = !bobbles[col]; render(); });
       bobbleBtn.addEventListener('mouseenter', (e) => { if (isTouchDevice) return; showBobbleTooltip(e, col); tooltipTarget = bobbleBtn; });
@@ -347,6 +349,13 @@
     e.target.value = playerLevel;
     enforceLevel();
     render();
+  });
+
+  document.getElementById('level-dec').addEventListener('click', () => {
+    if (playerLevel > 0) { playerLevel--; document.getElementById('level-input').value = playerLevel; enforceLevel(); render(); }
+  });
+  document.getElementById('level-inc').addEventListener('click', () => {
+    if (playerLevel < 50) { playerLevel++; document.getElementById('level-input').value = playerLevel; enforceLevel(); render(); }
   });
 
   document.getElementById('btn-reset').addEventListener('click', resetAll);

@@ -19,17 +19,20 @@ h1 span{color:var(--accent);font-weight:400}
 /* Header */
 .header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;flex-wrap:wrap;gap:8px}
 .header-controls{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
-.header-controls-row{display:flex;align-items:center;gap:24px}
+.header-controls-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .youre-special-toggle{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--text-dim);cursor:pointer;user-select:none}
 .youre-special-toggle input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
-.bobble-btn{min-width:24px;width:32px;height:32px;border:1px solid var(--border);background:var(--surface2);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:3px;flex-shrink:1;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.bobble-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--surface2);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:2px;flex-shrink:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .bobble-btn:hover{border-color:var(--accent)}
 .bobble-btn.active{background:var(--accent);border-color:var(--accent-bright)}
 .points-display{font-size:.85rem;color:var(--text-dim)}
 .points-display b{color:var(--text-bright);font-size:1rem}
 .points-display.over b{color:var(--red)}
 .level-selector{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--text-dim)}
-.level-selector input{width:50px;background:var(--surface2);border:1px solid var(--border);color:var(--text-bright);border-radius:4px;padding:2px 6px;font-size:.85rem;text-align:center}
+.level-selector input{width:50px;background:var(--surface2);border:1px solid var(--border);color:var(--text-bright);border-radius:0;padding:2px 6px;font-size:.85rem;text-align:center;-moz-appearance:textfield}
+.level-selector input::-webkit-inner-spin-button,.level-selector input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.level-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:4px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.level-btn:hover{background:var(--surface3);border-color:var(--accent)}
 
 /* Header actions */
 .header-actions{display:flex;gap:6px;align-items:center}
@@ -44,12 +47,13 @@ h1 span{color:var(--accent);font-weight:400}
 .btn-reset:hover{border-color:var(--red);color:var(--red)}
 
 /* SPECIAL stat (inside perk-col) */
-.special-stat{display:flex;align-items:center;justify-content:center;gap:4px;padding:4px 6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;position:relative;min-width:0;overflow:hidden}
-.special-stat .label{font-size:.7rem;font-weight:700;letter-spacing:1px;flex-shrink:0}
+.special-stat{display:flex;align-items:center;justify-content:center;gap:4px;padding:4px 6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;position:relative;min-width:0;flex-wrap:wrap}
+.special-stat .label{font-size:.7rem;font-weight:700;letter-spacing:1px;flex-shrink:0;width:35px}
 .special-stat .value{font-size:1.2rem;font-weight:700;color:var(--text-bright);line-height:1;flex-shrink:0}
 .special-stat .bonus{font-size:.65rem;color:var(--accent)}
-.special-stat .controls{display:flex;gap:2px;flex-shrink:1}
-.special-stat .controls button{min-width:24px;width:32px;height:32px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:4px;cursor:pointer;font-size:1.1rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:1}
+.special-stat .stat-buttons{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.special-stat .controls{display:flex;gap:2px;flex-shrink:0}
+.special-stat .controls button{width:28px;height:28px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:4px;cursor:pointer;font-size:1.1rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .special-stat .controls button:hover:not(:disabled){background:var(--surface3);border-color:var(--accent)}
 .special-stat .controls button:disabled{opacity:.3;cursor:default}
 /* Training row in perk grid */
@@ -133,9 +137,7 @@ h1 span{color:var(--accent);font-weight:400}
 .footer .copyright{width:100%;text-align:center;color:var(--text-dim);font-size:.6rem;opacity:.6}
 
 /* Responsive */
-@media(max-width:900px){
-  .perk-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-}
-@media(max-width:600px){
-  html{font-size:12px}
+@media(max-width:1100px){
+  .perk-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));row-gap:12px}
+  .mod-versions{display:none}
 }
